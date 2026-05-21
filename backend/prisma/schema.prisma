@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // Change to "postgresql" for production deployment
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  workflows     Workflow[]
+  agents        AIAgent[]
+  integrations  Integration[]
+  notifications Notification[]
+}
+
+model Workflow {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  active      Boolean     @default(false)
+  nodes       String      @default("[]") // Serialized JSON array of nodes
+  edges       String      @default("[]") // Serialized JSON array of edges
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  executions  Execution[]
+}
+
+model Execution {
+  id          String   @id @default(uuid())
+  status      String   // "SUCCESS" | "FAILED" | "RUNNING"
+  logs        String   @default("[]") // Serialized JSON array of logs
+  duration    Int      @default(0)    // In milliseconds
+  createdAt   DateTime @default(now())
+  workflowId  String
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+model AIAgent {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  model       String   // "gpt-4o" | "gpt-3.5-turbo" | "claude-3"
+  prompt      String
+  memory      String   @default("short-term") // "none" | "short-term" | "long-term"
+  createdAt   DateTime @default(now())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Integration {
+  id          String   @id @default(uuid())
+  name        String   // "gmail" | "slack" | "discord" | "stripe" etc.
+  connected   Boolean  @default(false)
+  config      String   @default("{}") // Serialized configuration JSON
+  createdAt   DateTime @default(now())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
