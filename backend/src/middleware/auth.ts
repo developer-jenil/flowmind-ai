@@ -13,6 +13,12 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     return res.status(401).json({ error: 'Access token required' });
   }
 
+  // Handle mock hackathon login token
+  if (token === 'mock-jwt-token-google-auth-2026') {
+    req.userId = 'demo-user-id';
+    return next();
+  }
+
   jwt.verify(token, process.env.JWT_SECRET || 'super-secret-key-flowmind-ai-2026-hackathon', (err, decoded: any) => {
     if (err) {
       return res.status(403).json({ error: 'Invalid or expired token' });

@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import url from 'url';
 import apiRouter from './routes/api';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
 
@@ -81,8 +82,29 @@ export const broadcastWorkflowEvent = (workflowId: string, message: any) => {
   }
 };
 
+const prisma = new PrismaClient();
+
+async function seedDemoUser() {
+  try {
+    await prisma.user.upsert({
+      where: { email: 'hackathon-judge@flowmind.ai' },
+      update: {},
+      create: {
+        id: 'demo-user-id',
+        email: 'hackathon-judge@flowmind.ai',
+        password: 'demo-password-not-used',
+        name: 'Judge Reviewer'
+      }
+    });
+    console.log('Demo user seeded successfully or already exists.');
+  } catch (err) {
+    console.error('Failed to seed demo user:', err);
+  }
+}
+
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+  await seedDemoUser();
   console.log(`FlowMind AI Backend running on http://localhost:${PORT}`);
   console.log(`WebSocket Server mounted at ws://localhost:${PORT}`);
 });

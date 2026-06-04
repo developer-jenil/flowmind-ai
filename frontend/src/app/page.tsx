@@ -16,6 +16,11 @@ export default function LandingPage() {
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [simulationLogs, setSimulationLogs] = useState<string[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Mock simulation for Landing Page Hero
   const startDemoSimulation = async () => {
@@ -66,7 +71,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            {token ? (
+            {mounted && token ? (
               <button 
                 onClick={() => router.push('/dashboard')}
                 className="px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-indigo-600/20"

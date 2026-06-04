@@ -25,17 +25,24 @@ export default function DashboardLayout({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Authenticated route guard
   useEffect(() => {
-    if (!token) {
-      router.push('/login');
-    } else {
-      fetchNotifications();
+    if (mounted) {
+      if (!token) {
+        router.push('/login');
+      } else {
+        fetchNotifications();
+      }
     }
-  }, [token, router, fetchNotifications]);
+  }, [token, router, fetchNotifications, mounted]);
 
-  if (!token) {
+  if (!mounted || !token) {
     return (
       <div className="min-h-screen bg-[#030303] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
